@@ -7,19 +7,23 @@ pygame.init()
 black = (0.0, 0.0, 0.0, 1.0)
 
 size = 4
-width = 100 * size
+width = 150 * size
 height = width
+
+screen = pygame.display.set_mode(
+    (width, height),
+    pygame.OPENGL | pygame.DOUBLEBUF
+)
+
+width = int(width/size)
+height = width
+
 
 pixels = []
 for i in range(width):
     pixels.append([])
     for j in range(height):
         pixels[i].append(0)
-
-screen = pygame.display.set_mode(
-    (width, height),
-    pygame.OPENGL | pygame.DOUBLEBUF
-)
 
 def Block(x, y):
     pixels[x][y] = 1
@@ -290,8 +294,8 @@ def GenerateScreen(factor):
                 
                 probabilidad = random.randint(1, 10)
                 if probabilidad >= 6:
-                    x = int(i/size)
-                    y = int(j/size)
+                    x = i
+                    y = j
                     func = random.randint(1, 15)
 
                     if func == 1:
@@ -325,7 +329,7 @@ def GenerateScreen(factor):
                     elif func == 15:
                         Infinite(x, y)
         
-GenerateScreen(int((width/size)/2))
+GenerateScreen(int((height)/10))
 running = True
 while running:
     # clean
