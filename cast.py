@@ -5,7 +5,7 @@ from OpenGL.GL import *
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
-
+TRANSPARENT = (152, 0, 136)
 SKY = (50, 100, 200)
 GROUND = (200, 200, 100)
 
@@ -17,7 +17,6 @@ colors = [
   (255, 255, 255)
 ]
 
-
 walls = {
     "1": pygame.image.load('./wall1.png'),
     "2": pygame.image.load('./wall2.png'),
@@ -26,18 +25,42 @@ walls = {
     "5": pygame.image.load('./wall5.png'),
 }
 
+sprite1 = pygame.image.load('./sprite1.png')
+sprite2 = pygame.image.load('./sprite2.png')
+sprite3 = pygame.image.load('./sprite3.png')
+sprite4 = pygame.image.load('./sprite4.png')
+
+enemies = [
+    {
+        "x": 120,
+        "y": 120,
+        "sprite": sprite1
+    },
+    {
+        "x": 300,
+        "y": 300,
+        "sprite": sprite2
+    }
+]
+
 class Raycaster(object):
     def __init__ (self, screen):
         self.screen = screen
         x, y, self.width, self.height = screen.get_rect()
         self.blocksize = 50
-        self.map = []
+        self.scale = 10
         self.player = {
             "x": int(self.blocksize + self.blocksize / 2),
             "y": int(self.blocksize + self.blocksize / 2),
             "fov": int(pi/3),
             "a": int(pi/3)
         }
+        self.zbuffer = [99999 for z in range(0, int(self.width/2))]
+        self.map = []
+        self.clearZ()
+
+    def clearZ(self):
+        self.zbuffer = [99999 for z in range(0, int(self.width/2))]
 
     def point(self, x, y, c = WHITE):
         self.screen.set_at((x, y), c)
@@ -71,6 +94,7 @@ class Raycaster(object):
         self.draw_player()
         density = 100
 
+
         #minimap 
         for i in range(0, density):
             a = self.player["a"] - self.player["fov"] / 2 + self.player["fov"]*i/density
@@ -87,12 +111,52 @@ class Raycaster(object):
         for i in range(0, int(self.width/2)):
             a = self.player["a"] - self.player["fov"] / 2 + self.player["fov"]*i/(self.width/2)
             d, c, tx = self.cast_ray(a)
-
             x = int(self.width/2) + i
-            h = (self.height/(d * cos(a - self.player["a"]))) * self.height/10
+            h = (self.height/(d * cos(a - self.player["a"]))) * self.height/self.scale
 
-            self.draw_stake(x, h, c, tx)
+            if self.zbuffer[i] >= d:
+                self.draw_stake(x, h, c, tx)
+                self.zbuffer[i] = d
+        
+        for enemy in enemies:
+            self.point(enemy["x"], enemy["y"], (255, 0, 0))
 
+        for enemy in enemies:
+            self.draw_sprite(enemy)
+
+    def draw_sprite(self, sprite):
+        sprite_a = atan2(
+            sprite["y"] - self.player["y"], 
+            sprite["x"] - self.player["x"]
+        )
+
+        d = (
+            (self.player["x"] - sprite["x"])**2 + 
+            (self.player["y"] - sprite["y"])**2
+            )** 0.5
+
+        sprite_size = int(((self.width/2)/d) * self.height/self.scale)
+
+        sprite_x = int(
+            (self.width/2) + 
+            (sprite_a - self.player["a"]) * 
+            (self.width/2) / self.player["fov"] 
+            + sprite_size/2)
+
+        sprite_y = int(self.height/2 - sprite_size/2)
+        
+        for x in range(sprite_x, sprite_x + sprite_size):
+            for y in range(sprite_y, sprite_y + sprite_size):
+                tx = int((x - sprite_x) * 128 / sprite_size)
+                ty = int((y - sprite_y) * 128 / sprite_size)
+                
+                c = sprite["sprite"].get_at((tx, ty))
+
+                if c != TRANSPARENT:
+                    if(x > int(self.width/2) and x < self.width):
+                        if self.zbuffer[x - int(self.width/2)] >= d:
+                            self.zbuffer[x - int(self.width/2)] = d
+                            self.point(x, y, c)
 
     def cast_ray(self, a):
         d = 0
@@ -143,7 +207,7 @@ while running:
     screen.fill(BLACK, (0, 0, r.width/2, r.height))
     screen.fill(SKY, (r.width/2, 0, r.width, r.height/2))
     screen.fill(GROUND, (r.width/2, r.height/2, r.width, r.height/2))
-
+    r.clearZ()
     r.render()
 
     pygame.display.flip()
@@ -161,7 +225,6 @@ while running:
                 r.player["y"] -= 10
             if event.key == pygame.K_DOWN:
                 r.player["y"] += 10
-
             if event.key == pygame.K_a:
                 r.player["a"] += pi/10
             if event.key == pygame.K_d:
