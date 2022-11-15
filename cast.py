@@ -92,7 +92,7 @@ class Raycaster(object):
     def render(self):
         self.draw_map()
         self.draw_player()
-        density = 100
+        density = 50
 
         #minimap 
         for i in range(0, density):
@@ -106,7 +106,7 @@ class Raycaster(object):
             self.point(501, i)
 
         #draw in 3d
-        density = 100
+        density = 50
         for i in range(0, int(self.width/2)):
             a = self.player["a"] - self.player["fov"] / 2 + self.player["fov"]*i/(self.width/2)
             d, c, tx = self.cast_ray(a)
@@ -270,18 +270,9 @@ while running:
                     r.player["y"] -= 10
                 elif a == pi:
                     r.player["x"] -= 10
-                elif a < pi/2 :
+                else :
                     r.player["y"] += int(10 * sin(r.player["a"]))
                     r.player["x"] += int(10 * cos(r.player["a"]))
-                elif a > pi/2 and a < pi:
-                    r.player["x"] -= int(10 * cos(r.player["a"]))
-                    r.player["y"] += int(10 * sin(r.player["a"]))
-                elif a > pi and a < 3*pi/2:
-                    r.player["y"] -= int(10 * sin(r.player["a"]))
-                    r.player["x"] -= int(10 * cos(r.player["a"]))
-                elif a > 3*pi/2 and a < 2*pi:
-                    r.player["x"] += int(10 * cos(r.player["a"]))
-                    r.player["y"] -= int(10 * sin(r.player["a"]))
             if event.key == pygame.K_DOWN:
                 if a == pi/2:
                     r.player["y"] -= 10
@@ -291,18 +282,9 @@ while running:
                     r.player["y"] += 10
                 elif a == pi:
                     r.player["x"] += 10
-                elif a < pi/2 :
+                else:
                     r.player["y"] -= int(10 * sin(r.player["a"]))
                     r.player["x"] -= int(10 * cos(r.player["a"]))
-                elif a > pi/2 and a < pi:
-                    r.player["x"] += int(10 * cos(r.player["a"]))
-                    r.player["y"] -= int(10 * sin(r.player["a"]))
-                elif a > pi and a < 3*pi/2:
-                    r.player["y"] += int(10 * sin(r.player["a"]))
-                    r.player["x"] -= int(10 * cos(r.player["a"]))
-                elif a > 3*pi/2 and a < 2*pi:
-                    r.player["x"] -= int(10 * cos(r.player["a"]))
-                    r.player["y"] += int(10 * sin(r.player["a"]))
             if event.key == pygame.K_a:
                 if r.player["a"] <= 0:
                     r.player["a"] = 2*pi - pi/10
