@@ -25,23 +25,36 @@ walls = {
     "5": pygame.image.load('./wall5.png'),
 }
 
-sprite1 = pygame.image.load('./sprite1.png')
-sprite2 = pygame.image.load('./sprite2.png')
-sprite3 = pygame.image.load('./sprite3.png')
-sprite4 = pygame.image.load('./sprite4.png')
+Key = pygame.image.load('./Key.png')
+map_keys = pygame.image.load('./map_keys.png')
+selected_key = pygame.image.load('./selected_key.png')
 
-enemies = [
+keys = [
     {
         "x": 120,
         "y": 120,
-        "sprite": sprite1
+        "sprite": map_keys,
+        "selected": False,
+        "enabled": True
     },
     {
-        "x": 300,
-        "y": 300,
-        "sprite": sprite2
+        "x": 290,
+        "y": 170,
+        "sprite": map_keys,
+        "selected": False,
+        "enabled": True
+    },
+    {
+        "x": 380,
+        "y": 370,
+        "sprite": map_keys,
+        "selected": False,
+        "enabled": True
     }
 ]
+
+start = pygame.image.load('./inicio.png')
+final = pygame.image.load('./final.png')
 
 class Raycaster(object):
     def __init__ (self, screen):
@@ -58,6 +71,7 @@ class Raycaster(object):
         self.zbuffer = [99999 for z in range(0, int(self.width/2))]
         self.map = []
         self.clearZ()
+        self.keys = 0
 
     def clearZ(self):
         self.zbuffer = [99999 for z in range(0, int(self.width/2))]
@@ -94,10 +108,27 @@ class Raycaster(object):
         self.draw_player()
         density = 50
 
+
         #minimap 
         for i in range(0, density):
             a = self.player["a"] - self.player["fov"] / 2 + self.player["fov"]*i/density
             d, c, tx = self.cast_ray(a)
+
+        # draw keys
+        size = 55
+        key_size = 128
+
+        for i in range(self.keys):
+            factor = i * size
+            for x in range(factor, size + factor):
+                for y in range(0, size):
+                    tx = int((x - factor) * key_size / size)
+                    ty = int(y * key_size / size)
+                    c = Key.get_at((tx, ty))
+                    
+        
+                    if c != TRANSPARENT:
+                        self.point(x, y, c)
 
         # line
         for i in range(0, 500):
@@ -119,11 +150,17 @@ class Raycaster(object):
                 self.draw_stake(x, h, c, tx)
                 self.zbuffer[i] = d
         
-        for enemy in enemies:
-            self.point(enemy["x"], enemy["y"], (255, 0, 0))
+        for key in keys:
+            if key["enabled"]:
+                self.point(key["x"]    , key["y"], (255, 0, 0))
+                self.point(key["x"] + 1, key["y"] + 1, (255, 0, 0))
+                self.point(key["x"] + 1, key["y"] - 1, (255, 0, 0))
+                self.point(key["x"] - 1, key["y"] - 1, (255, 0, 0))
+                self.point(key["x"] - 1, key["y"] + 1, (255, 0, 0))
 
-        for enemy in enemies:
-            self.draw_sprite(enemy)
+        for key in keys:
+            if key["enabled"]:
+                self.draw_sprite(key)
 
     def draw_sprite(self, sprite):
         sprite_a = atan2(
@@ -135,6 +172,10 @@ class Raycaster(object):
             (self.player["x"] - sprite["x"])**2 + 
             (self.player["y"] - sprite["y"])**2
             )** 0.5
+
+        if d < 50:
+            sprite["sprite"] = selected_key
+            sprite["selected"] = True
 
         sprite_size = int(((self.width/2)/d) * self.height/self.scale)
 
@@ -197,13 +238,32 @@ class Raycaster(object):
             color = walls[c].get_at((tx, ty))
             self.point(x, y, color)
 
+    def draw_image(self, image):
+        for x in range(0, self.width):
+            for y in range(0, self.height):
+                self.point(x, y, image.get_at((x, y)))
+
 pygame.init()
 screen = pygame.display.set_mode((1000, 500))
 r = Raycaster(screen)
 r.load_map("./map.txt")
+inicio = True
+while inicio:
 
-running = True
-while running:
+    r.draw_image(start)
+
+    pygame.display.flip()
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_RETURN:
+                inicio = False
+    
+
+#running = True
+while r.keys < len(keys):
     screen.fill(BLACK, (0, 0, r.width/2, r.height))
     screen.fill(SKY, (r.width/2, 0, r.width, r.height/2))
     screen.fill(GROUND, (r.width/2, r.height/2, r.width, r.height/2))
@@ -211,6 +271,7 @@ while running:
     r.render()
 
     pygame.display.flip()
+
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -293,3 +354,22 @@ while running:
                 if r.player["a"] >= 2*pi:
                     r.player["a"] = pi/10
                 r.player["a"] += pi/10
+            if event.key == pygame.K_e:
+                for key in keys:
+                    if key["selected"] and key["enabled"]:
+                        key["enabled"] = False
+                        r.keys += 1
+
+victoria = True
+while victoria:
+
+    r.draw_image(final)
+
+    pygame.display.flip()
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_RETURN:
+                victoria = False
