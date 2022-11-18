@@ -152,8 +152,7 @@ class Raycaster(object):
                 if self.zbuffer[i] >= d:
                     self.draw_stake(x, h, c, tx)
                     self.zbuffer[i] = d
-            except e as Exception:
-                print(e)
+            except Exception as e:
                 self.avanzar = False
                 self.movement()
 
