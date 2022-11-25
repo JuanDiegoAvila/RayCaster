@@ -53,7 +53,8 @@ keys = [
     }
 ]
 
-start = pygame.image.load('./inicio.png')
+#start = pygame.image.load('./inicio.png')
+start = pygame.image.load('./inicio_2.png')
 final = pygame.image.load('./final.png')
 
 class Raycaster(object):
@@ -437,16 +438,22 @@ class Raycaster(object):
 pygame.init()
 screen = pygame.display.set_mode((1000, 500))
 r = Raycaster(screen)
-r.load_map("./map.txt")
 
 key_effect = pygame.mixer.Sound('GrabKeys.mp3')
 pygame.mixer.music.load('music.mp3')
 pygame.mixer.music.play(-1)
 pygame.mixer.music.set_volume(0.1)
 
+font = pygame.font.SysFont("Arial", 20, bold = True)
+
+maps = ['map1.txt', 'map2.txt']
+actual_level = 'map1.txt'
 inicio = True
 while inicio:
     r.draw_image(start)
+    
+    fps_text = font.render('Presiona 1 o 2 para elegir el nivel', 1, pygame.Color("White"))
+    r.screen.blit(fps_text, (r.width/2-120, r.height/2+70))
 
     pygame.display.flip()
 
@@ -454,11 +461,15 @@ while inicio:
         if event.type == pygame.QUIT:
             pygame.quit()
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_RETURN:
+            if event.key == pygame.K_1:
                 inicio = False
+                actual_level = maps[0]
+            if event.key == pygame.K_2:
+                inicio = False
+                actual_level = maps[1]
 
+r.load_map(actual_level)
 clock = pygame.time.Clock()
-font = pygame.font.SysFont("Arial", 20, bold = True)
 
 #running = True
 while r.keys < len(keys):
