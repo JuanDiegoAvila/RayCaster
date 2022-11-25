@@ -264,7 +264,7 @@ class Raycaster(object):
         
         a = r.player["a"]
 
-        if event.key == pygame.K_RIGHT:
+        if event.key == pygame.K_RIGHT or event.key == pygame.K_d:
                 if a == pi/2:
                     if r.avanzar:
                         r.player["x"] -= 10
@@ -313,7 +313,7 @@ class Raycaster(object):
                     else:
                         r.player["y"] += int(10 * sin(r.player["a"]))
                         r.player["x"] -= int(10 * cos(r.player["a"]))
-        if event.key == pygame.K_LEFT:
+        if event.key == pygame.K_LEFT or event.key == pygame.K_a:
             if a == pi/2:
                 if r.avanzar:
                     r.player["x"] += 10
@@ -362,7 +362,7 @@ class Raycaster(object):
                 else:
                     r.player["y"] -= int(10 * sin(r.player["a"]))
                     r.player["x"] += int(10 * cos(r.player["a"]))
-        if event.key == pygame.K_UP:
+        if event.key == pygame.K_UP or event.key == pygame.K_w:
             if a == pi/2:
                 if r.avanzar:
                     r.player["y"] += 10
@@ -390,7 +390,7 @@ class Raycaster(object):
                 else:
                     r.player["y"] -= int(10 * sin(r.player["a"]))
                     r.player["x"] -= int(10 * cos(r.player["a"]))
-        if event.key == pygame.K_DOWN:
+        if event.key == pygame.K_DOWN or event.key == pygame.K_s:
             if a == pi/2:
                 if r.avanzar:
                     r.player["y"] -= 10
@@ -418,14 +418,14 @@ class Raycaster(object):
                 else:
                     r.player["y"] += int(10 * sin(r.player["a"]))
                     r.player["x"] += int(10 * cos(r.player["a"]))
-        if event.key == pygame.K_a:
-            if r.player["a"] <= 0:
-                r.player["a"] = 2*pi - pi/10
-            r.player["a"] -= pi/10
-        if event.key == pygame.K_d:
-            if r.player["a"] >= 2*pi:
-                r.player["a"] = pi/10
-            r.player["a"] += pi/10
+        #if event.key == pygame.K_a:
+        #    if r.player["a"] <= 0:
+        #        r.player["a"] = 2*pi - pi/10
+        #    r.player["a"] -= pi/10
+        #if event.key == pygame.K_d:
+        #    if r.player["a"] >= 2*pi:
+        #        r.player["a"] = pi/10
+        #    r.player["a"] += pi/10
         if event.key == pygame.K_e:
             for key in keys:
                 if key["selected"] and key["enabled"]:
@@ -454,6 +454,9 @@ while inicio:
     
     fps_text = font.render('Presiona 1 o 2 para elegir el nivel', 1, pygame.Color("White"))
     r.screen.blit(fps_text, (r.width/2-120, r.height/2+70))
+    
+    fps_text = font.render('Utiliza WASD o las flechas para moverte, y el mouse para rotar', 1, pygame.Color("White"))
+    r.screen.blit(fps_text, (r.width/2-220, r.height/2+100))
 
     pygame.display.flip()
 
@@ -494,6 +497,11 @@ while r.keys < len(keys):
         if event.type == pygame.KEYDOWN:
             r.prev_event = event
             r.movement(r, event)
+        
+        # obtener mouse para rotar al jugador
+        if event.type == pygame.MOUSEMOTION:
+            if pygame.mouse.get_pos()[0] > screen.get_width() / 2:
+                r.player["a"] += event.rel[0] * 2*pi / (screen.get_width()/2)
     
 
 
